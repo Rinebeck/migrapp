@@ -1,0 +1,7 @@
+{
+  "name": "migrappia",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}

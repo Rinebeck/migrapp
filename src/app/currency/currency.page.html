@@ -1,0 +1,19 @@
+<ion-content padding class="bg">
+    <ion-card padding class="bgW">
+        <ion-card-title>
+           <ion-icon name="logo-usd"></ion-icon>
+            Tipo de moneda
+        </ion-card-title>             
+        <div text-left><h6>Moneda:<ion-text color="primary">{{select.code | json}}</ion-text></h6></div>          
+        <ion-searchbar [(ngModel)]="search" [showCancelButton]="true" placeholder="Busca una divisa..."></ion-searchbar>
+            <ion-list>
+                <ion-item [button]="true" *ngFor="let currency of currenciesList" (click)="selectedCategory(currency)">
+                    <ion-label>{{currency.code}} - {{currency.currency}}</ion-label>
+                    <ion-icon slot="start"
+                              [color]="(itemChecked == currency.id ? 'primary' : 'medium')"
+                              [name]="'radio-button-' + (itemChecked == currency.id ? 'on' : 'off')">
+                    </ion-icon>                
+                </ion-item>
+            </ion-list>    
+    </ion-card>          
+</ion-content>

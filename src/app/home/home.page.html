@@ -1,0 +1,189 @@
+<ion-content padding class="bg">
+  
+    <ion-searchbar animated type="text" autocorrect [(ngModel)]="term" 
+                 (ionChange)="searchChanged()" (ionCancel)="onCancel()" placeholder="Buscar ciudad o país...">
+    </ion-searchbar><br/> 
+ 
+    <ion-item>
+       <ion-label stacked color="primary">Tipo de datos</ion-label>
+       <ion-select interface="alert" [(ngModel)]="typesData.values" (ionChange)="setType($event)">
+          <ion-select-option *ngIf="typesData.values==0" value="0" [selected]="true"></ion-select-option>
+          <ion-select-option *ngFor="let types of type" [value]="types.name">{{types.name}}</ion-select-option>
+       </ion-select>
+    </ion-item>
+ 
+<i class="material-icons">face</i>
+    <div *ngFor="let result of (results | async)">
+ 
+       <!--COSTO DE VIDA-->  
+       <div *ngIf="typesData.values == 'Costo de vida'">
+          <ion-card class="cardStyle" padding *ngFor="let cost of result.cost; let icon of icono" (click)="toggleDetails(icon)">      
+          <ion-icon style="float: right;" *ngIf="!isValid" name="arrow-down" [name]="icon.arrow"></ion-icon>                   
+          <strong>{{cost.category}}</strong> 
+             <ion-list  class="card-results" *ngIf="icon.showDetails" no-lines> 
+                   <div *ngFor="let prices of cost.items">
+                      <div><br/><strong>&nbsp;{{prices.name}}</strong></div>
+                      <div><ion-label class="result-one">                             
+                         &nbsp;&nbsp;{{prices.price | currency: currency.code: symbol}}          
+                      </ion-label></div>  
+                   </div>
+             </ion-list>    
+          </ion-card>
+       </div><!--Fin type=Costo de vida>-->
+ 
+       <!--CRIMINALIDAD-->
+       <div *ngIf="typesData.values == 'Criminalidad'">
+          <ion-card class="cardStyle" padding *ngFor="let icon of icono" (click)="toggleDetails(icon)">      
+          <ion-icon style="float: right;" *ngIf="!isValid" name="arrow-down" [name]="icon.arrow"></ion-icon>                   
+          <strong>Seguridad</strong> 
+             <ion-list  class="card-results" *ngIf="icon.showDetails" no-lines> 
+                <div *ngFor="let crime of result.crime">
+                   <ion-grid fixed *ngFor="let c of crimeDetails">  
+                      <ion-row>
+                         <ion-col size="7" text-wrap>
+                            <div><br/>{{c.detail}}</div>
+                         </ion-col>
+                         <ion-col size="2" text-wrap>
+                            <div><br/>
+                            <ion-text [color]="(59 > crime[c.code] && !c.detail.includes('Seguridad') || crime[c.code] > 59  && c.detail.includes('Seguridad') ? 'success' : 'danger')">  
+                               {{ crime[c.code] }}
+                            </ion-text></div> <!--*ngIf="c.detail.includes('Seguridad')"-->
+                         </ion-col>
+                         <ion-col size="3" text-wrap>   
+                            <div><br/>
+                            <ion-text [color]="(59 > crime[c.code] && !c.detail.includes('Seguridad') || crime[c.code] > 59  && c.detail.includes('Seguridad') ? 'success' : 'danger')">        
+                              <label *ngIf="(20 >= crime[c.code] && crime[c.code] > 0)"> Muy Bajo</label>
+                              <label *ngIf="(49 >= crime[c.code] && crime[c.code] > 19)"> Bajo</label>
+                              <label *ngIf="(59 >= crime[c.code] && crime[c.code] > 49)"> Moderado</label>
+                              <label *ngIf="(79 >  crime[c.code] && crime[c.code] > 59)"> Alto</label>
+                              <label *ngIf="(100 > crime[c.code] && crime[c.code] > 79)"> Muy Alto</label>
+                            </ion-text></div>   
+                         </ion-col>  
+                      </ion-row>
+                   </ion-grid>
+                </div>
+                <div><br/>Si el valor es 0, significa que se percibe como muy bajo. Si el valor es 100, se percibe como muy alto.</div>
+             </ion-list>    
+          </ion-card>     
+       </div><!--Fin type=Criminalidad>-->
+ 
+       <!--SANINDAD-->
+       <div *ngIf="typesData.values == 'Sanidad'">
+          <ion-card class="cardStyle" padding *ngFor="let icon of icono" (click)="toggleDetails(icon)">      
+          <ion-icon style="float: right;" *ngIf="!isValid" name="arrow-down" [name]="icon.arrow"></ion-icon>                   
+          <strong>Servicios médicos</strong> 
+             <ion-list  class="card-results" *ngIf="icon.showDetails" no-lines> 
+                <div *ngFor="let health of result.health;">
+                   <ion-grid fixed *ngFor="let h of healthDetails">  
+                      <ion-row>
+                         <ion-col size="7" text-wrap>
+                            <div><br/>{{h.detail}}</div>
+                         </ion-col>
+                         <ion-col size="2" text-wrap>
+                            <div><br/><ion-text [color]="(health[h.code] > 49 ? 'success' : 'danger')">  
+                               {{ health[h.code] }}
+                            </ion-text></div>   
+                         </ion-col>
+                         <ion-col size="3" text-wrap>   
+                            <div><br/><ion-text [color]="(health[h.code] > 49 ? 'success' : 'danger')">        
+                              <label *ngIf="(20  >= health[h.code] && health[h.code] > 0)">  Muy Bajo</label>
+                              <label *ngIf="(49  >= health[h.code] && health[h.code] > 19)"> Bajo</label>
+                              <label *ngIf="(59  >= health[h.code] && health[h.code] > 49)"> Moderado</label>
+                              <label *ngIf="(79  >  health[h.code] && health[h.code] > 59)"> Alto</label>
+                              <label *ngIf="(100 >  health[h.code] && health[h.code] > 79)"> Muy Alto</label>
+                            </ion-text></div>   
+                         </ion-col>  
+                      </ion-row>
+                   </ion-grid>
+                </div>
+                <div><br/>Si el valor es 0, significa que se percibe como muy bajo. Si el valor es 100, se percibe como muy alto.</div>
+             </ion-list>    
+          </ion-card>   
+       </div><!--Fin type=Sanidad>-->
+ 
+       <!--CONTAMINACIÓN-->
+       <div *ngIf="typesData.values == 'Contaminación'">
+                               <!--Contaminación-->
+          <ion-card class="cardStyle" padding *ngFor="let d of pollutionDetails; let icon of icono" (click)="toggleDetails(icon)">      
+          <ion-icon style="float: right;" *ngIf="!isValid" name="arrow-down" [name]="icon.arrow"></ion-icon>                   
+          <strong>{{d.name}}</strong> 
+             <ion-list  class="card-results" *ngIf="icon.showDetails" no-lines> 
+                <div *ngFor="let pollution of result.pollution;">
+                  <ion-grid fixed *ngFor="let p of d.data">  
+                      <ion-row>
+                         <ion-col size="7" text-wrap>
+                            <div><br/>{{p.detail}}</div>
+                         </ion-col>
+                         <ion-col size="2" text-wrap>
+                               <!--Contaminacion-->
+                            <div *ngIf="d.name == 'Contaminación'"><br/><ion-text [color]="(100 - pollution[p.code] > 59 ? 'danger' : 'success')">  
+                                {{100 - pollution[p.code] }}
+                            </ion-text></div>  
+                              <!--Limpieza-->
+                            <div *ngIf="d.name == 'Limpieza'"><br/><ion-text [color]="(pollution[p.code] > 49 ? 'success' : 'danger')">  
+                                  {{pollution[p.code] }}
+                            </ion-text></div>   
+                         </ion-col>
+ 
+                         <ion-col size="3" text-wrap>   
+                               <!--Contaminacion -->
+                            <div *ngIf="d.name == 'Contaminación'"><br/><ion-text [color]="(100 - pollution[p.code] > 59 ? 'danger' : 'success')">        
+                              <label *ngIf="(29  >= (100 - pollution[p.code]) && (100 - pollution[p.code]) > 0)">  Muy Bajo</label>
+                              <label *ngIf="(49  >= (100 - pollution[p.code]) && (100 - pollution[p.code]) > 29)"> Bajo</label>
+                              <label *ngIf="(59  >= (100 - pollution[p.code]) && (100 - pollution[p.code]) > 49)"> Moderado</label>
+                              <label *ngIf="(79  >  (100 - pollution[p.code]) && (100 - pollution[p.code]) > 59)"> Alto</label>
+                              <label *ngIf="(100 >  (100 - pollution[p.code]) && (100 - pollution[p.code]) > 79)"> Muy Alto</label>
+                            </ion-text></div>  
+                               <!--Limpieza -->
+                            <div *ngIf="d.name == 'Limpieza'"><br/><ion-text [color]="(pollution[p.code] > 49 ? 'success' : 'danger')">        
+                               <label *ngIf="(29  >= pollution[p.code] && pollution[p.code] > 0)">  Muy Bajo</label>
+                               <label *ngIf="(49  >= pollution[p.code] && pollution[p.code] > 29)"> Bajo</label>
+                               <label *ngIf="(59  >= pollution[p.code] && pollution[p.code] > 49)"> Moderado</label>
+                               <label *ngIf="(79  >  pollution[p.code] && pollution[p.code] > 59)"> Alto</label>
+                               <label *ngIf="(100 >  pollution[p.code] && pollution[p.code] > 79)"> Muy Alto</label>
+                            </ion-text></div>  
+                          </ion-col>  
+                      </ion-row>
+                   </ion-grid>
+                </div>
+                <div><br/>Si el valor es 0, significa que se percibe como muy bajo. Si el valor es 100, se percibe como muy alto.</div>
+             </ion-list>    
+          </ion-card> 
+       </div> <!--Fin type=Contaminación>-->
+ 
+       <!--TRÁFICO-->
+       <div *ngIf="typesData.values == 'Tráfico'">
+          <div *ngFor="let traffic of result.traffic; let icon of icono">
+             <ion-card class="cardStyle" padding *ngIf="traffic.distance > 1" (click)="toggleDetails(icon)">      
+             <ion-icon style="float: right;" *ngIf="!isValid" name="arrow-down" [name]="icon.arrow"></ion-icon>                   
+             <strong>{{traffic.traffic_name}}</strong> 
+                <ion-list  class="card-results" *ngIf="icon.showDetails" no-lines> 
+                   <ion-grid fixed *ngFor="let td of trafficDetails">  
+                      <ion-row text-wrap *ngIf="traffic[td.code] > 1"> 
+                         <ion-col size="6" >
+                            <div><br/>
+                               {{td.detail}}
+                            </div>
+                         </ion-col>
+                         <ion-col size="3" text-wrap>
+                            <div><br/>
+                               {{ traffic[td.code] }}  
+                               <label *ngIf="td.detail != 'Distancia'">Min</label>
+                               <label *ngIf="td.detail == 'Distancia'">Km</label>                                    
+                            </div>   
+                         </ion-col>
+                         <ion-col size="3" text-wrap>   
+                            <div><br/>
+                               {{ traffic[td.code] }}
+                            </div>   
+                         </ion-col>  
+                      </ion-row>
+                   </ion-grid>
+                </ion-list>    
+             </ion-card>            
+          </div>
+       </div><!--Fin type=Tráfico>-->
+ 
+    </div><!--FIN RESULT OF RESULTS-->
+
+ </ion-content>
